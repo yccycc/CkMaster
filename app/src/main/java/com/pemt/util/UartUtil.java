@@ -7,13 +7,14 @@ import com.pemt.jnahelper.CLibrary;
 public class UartUtil {
     private static final String TAG = "UartUtil";
     private int mSerialFd;
-    private String mDevice = "/dev/tty";
+    private String mDevice = "/dev/ttyMT1";
     private CLibrary.termios mSerialOptions;
     public void openSerial()
     {
         mSerialFd = CLibrary.INSTANCE.open(mDevice, CLibrary.O_RDWR | CLibrary.O_NOCTTY | CLibrary.O_NDELAY);
+        Log.i("goddess--fd=",mSerialFd+"");
         if (mSerialFd < 0) {
-            throw new RuntimeException("open device fail!");
+            throw new RuntimeException("open device fail!"+"***"+mSerialFd);
         }
 
         mSerialOptions = new CLibrary.termios();
@@ -156,6 +157,7 @@ public class UartUtil {
             default://不使用流控制
                 mSerialOptions.c_cflag &= ~CLibrary.CRTSCTS;
         }
+        setToEffective();
     }
     public void setParity(char flag)
     {
@@ -186,6 +188,7 @@ public class UartUtil {
                 mSerialOptions.c_cflag |= (CLibrary.PARODD | CLibrary.PARENB);
                 mSerialOptions.c_iflag |= CLibrary.INPCK;
         }
+        setToEffective();
     }
     public void setToEffective()
     {

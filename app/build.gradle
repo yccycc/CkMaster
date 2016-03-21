@@ -13,6 +13,7 @@ android {
         ndk{
             moduleName "ckutil"
             ldLibs "log"
+            abiFilters "armeabi"
             stl "gnustl_shared" //这个对应的是 APP_STL
         }
     }

@@ -3,12 +3,14 @@ package com.pemt.ckmaster;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import com.pemt.jnahelper.CLibraryYcc;
 import com.pemt.util.UartUtil;
 import com.pemt.util.UartUtil_1;
 
@@ -27,7 +29,7 @@ public class CkMain extends Activity {
     private Spinner mBaudrateSpinner;
     private Spinner mDataLenSpinner;
     static {
-        System.loadLibrary("ckutil");
+      //  System.loadLibrary("ckutil");
     }
 
     @Override
@@ -67,7 +69,8 @@ public class CkMain extends Activity {
 //                    mRsvThread.interrupt();
 //                }
 //                mRsvThread.start();
-                new UartUtil().openSerial();
+                //new UartUtil().openSerial();
+               Log.i("goddes", CLibraryYcc.INSTANCE.yccadd(100, 111)+"$");
             }
         });
         mWriteBtn.setOnClickListener(new View.OnClickListener() {
@@ -103,5 +106,6 @@ public class CkMain extends Activity {
 //            mRsvThread.interrupt();
 //        }
         //mUUartUtil.closeUart();
+        new UartUtil().closeSerial();
     }
 }
