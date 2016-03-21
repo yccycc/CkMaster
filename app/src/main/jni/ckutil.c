@@ -7,12 +7,12 @@
 #include <termios.h>//终端控制定义  
 #include <errno.h>
 #include "ckutil.h"
-char* device="/dev/ttyUSB0";
+char* device="/dev/ttyMT1";
 
 int serial_fd = 0;
 
 //打开串口并初始化设置  
-int init_serial(char* device,int baud_rate,int transfer_data_len)
+int init_serial()
 {
     serial_fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
     if (serial_fd < 0) {
@@ -41,20 +41,6 @@ int init_serial(char* device,int baud_rate,int transfer_data_len)
     /**3. 设置新属性，TCSANOW：所有改变立即生效*/
     tcflush(serial_fd, TCIFLUSH);//溢出数据可以接收，但不读  
     tcsetattr(serial_fd, TCSANOW, &options);
-
-
-    //test-bb
-    options.c_cflag &= ~CRTSCTS;
-    //
-    options.c_cflag |= CRTSCTS;
-    //
-    options.c_cflag |= IXON | IXOFF | IXANY;
-
-   // NCCS
-//    PARODD
-    //test-ee
-
-
     return 0;
 }
 

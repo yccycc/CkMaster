@@ -70,7 +70,8 @@ public class CkMain extends Activity {
 //                }
 //                mRsvThread.start();
                 //new UartUtil().openSerial();
-               Log.i("goddes", CLibraryYcc.INSTANCE.yccadd(100, 111)+"$");
+               Log.i("goddes", CLibraryYcc.INSTANCE.yccadd(100, 111) + "$");
+               // CkUtilLibrary.INSTANCE.init_serial();
             }
         });
         mWriteBtn.setOnClickListener(new View.OnClickListener() {
