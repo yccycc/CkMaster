@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:gravity="center"
+    tools:context="com.pemt.ckmaster.CkMain">
+    <EditText
+        android:id="@+id/screen_et"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/edt_hb" />
+    <LinearLayout
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="@string/dev_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <EditText
+            android:textSize="@dimen/et_text_size"
+            android:hint="@string/dev_name_def"
+            android:id="@+id/dev_name_et"
+            android:layout_width="@dimen/edt_w"
+            android:layout_height="@dimen/edt_h" />
+    </LinearLayout>
+    <LinearLayout
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="@string/baudrate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <EditText
+            android:visibility="gone"
+            android:hint="@string/baudrate_et_def"
+            android:numeric="integer"
+            android:id="@+id/baudrate_et"
+            android:layout_width="@dimen/edt_w"
+            android:layout_height="@dimen/edt_h" />
+        <Spinner
+            android:id="@+id/baudrate_spinner"
+            android:layout_width="@dimen/spinner_w"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+    <LinearLayout
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="@string/data_len"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <EditText
+            android:visibility="gone"
+            android:hint="@string/data_len_et_def"
+            android:numeric="integer"
+            android:id="@+id/data_len_et"
+            android:layout_width="@dimen/edt_w"
+            android:layout_height="@dimen/edt_h" />
+        <Spinner
+            android:id="@+id/data_len_spinner"
+            android:layout_width="@dimen/spinner_w"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <Button
+            android:text="@string/uart_set"
+            android:id="@+id/uart_set"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Button
+            android:visibility="gone"
+            android:id="@+id/read"
+            android:text="@string/rsv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:gravity="start|center_vertical"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/write"
+            android:text="@string/send"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <EditText
+            android:id="@+id/write_et"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/edt_h" />
+    </LinearLayout>
+</LinearLayout>

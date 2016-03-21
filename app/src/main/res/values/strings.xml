@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">CkMaster</string>
+    <string name="dev_name">设备名</string>
+    <string name="baudrate">波特率</string>
+    <string name="data_len">数据位</string>
+    <string name="send">发</string>
+    <string name="rsv">收</string>
+    <string name="uart_set">设置</string>
+    <string name="dev_name_def">/dev/ttyUSB0</string>
+    <string name="baudrate_et_def">4098</string>
+    <string name="data_len_et_def">8</string>
+</resources>
