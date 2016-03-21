@@ -49,14 +49,26 @@ public class UartUtil {
     }
     public void setDataBits(int dataBits)
     {
-        mSerialOptions.c_cflag |= dataBits;//8位数据长度
+        switch (dataBits)
+        {
+            case 5    :
+                mSerialOptions.c_cflag |= CLibrary.CS5;
+                break;
+            case 6    :
+                mSerialOptions.c_cflag |= CLibrary.CS6;
+                break;
+            case 7    :
+                mSerialOptions.c_cflag |= CLibrary.CS7;
+                break;
+            case 8:
+                mSerialOptions.c_cflag |= CLibrary.CS8;
+                break;
+            default:
+                mSerialOptions.c_cflag |= CLibrary.CS8;
+        }
         setToEffective();
     }
-    public void setToEffective()
-    {
-        CLibrary.INSTANCE.tcflush(mSerialFd, CLibrary.TCIFLUSH);//溢出数据可以接收，但不读
-        CLibrary.INSTANCE.tcsetattr(mSerialFd, CLibrary.TCSANOW, mSerialOptions);
-    }
+
 
     public int uartSend(String sendContent)
     {
@@ -104,25 +116,19 @@ public class UartUtil {
         }
         return 0;
     }
-    //add--not sure
-    public void setCtrlmode(int mode)
-    {
-        mSerialOptions.c_cflag |= mode;
-        setToEffective();
-    }
-    public void setCharLen(int charLen)
-    {
-        mSerialOptions.c_cflag &= charLen;
-        setToEffective();
-    }
-    public void setHardwareStreamCtrl(int hwc)
-    {
-        mSerialOptions.c_cflag &= hwc;
-        setToEffective();
-    }
     public void setStopBits(int stopBits)
     {
-        mSerialOptions.c_cflag &= stopBits;
+        switch (stopBits)
+        {
+            case 1:
+                mSerialOptions.c_cflag &= ~CLibrary.CSTOPB;
+                break;
+            case 2:
+                mSerialOptions.c_cflag |= CLibrary.CSTOPB;
+                break;
+            default:
+                mSerialOptions.c_cflag &= ~CLibrary.CSTOPB;
+        }
         setToEffective();
     }
 
@@ -132,17 +138,6 @@ public class UartUtil {
         setToEffective();
     }
 
-    public void setOutputMode(int outputMode)
-    {
-        mSerialOptions.c_oflag = outputMode;
-        setToEffective();
-    }
-
-    public void setTeminalMode(int teminalMode)
-    {
-        mSerialOptions.c_lflag = teminalMode;
-        setToEffective();
-    }
     //add 0321
     public void setFlowControl(int flag)
     {
@@ -158,6 +153,55 @@ public class UartUtil {
             case 2 ://使用软件流控制
                 mSerialOptions.c_cflag |= CLibrary.IXON | CLibrary.IXOFF | CLibrary.IXANY;
                 break;
+            default://不使用流控制
+                mSerialOptions.c_cflag &= ~CLibrary.CRTSCTS;
         }
+    }
+    public void setParity(char flag)
+    {
+        switch (flag)
+        {
+            case 'n':
+            case 'N': //无奇偶校验位。
+                mSerialOptions.c_cflag &= ~CLibrary.PARENB;
+                mSerialOptions.c_iflag &= ~CLibrary.INPCK;
+                break;
+            case 'o':
+            case 'O'://设置为奇校验
+                mSerialOptions.c_cflag |= (CLibrary.PARODD | CLibrary.PARENB);
+                mSerialOptions.c_iflag |= CLibrary.INPCK;
+                break;
+            case 'e':
+            case 'E'://设置为偶校验
+                mSerialOptions.c_cflag |= CLibrary.PARENB;
+                mSerialOptions.c_cflag &= ~CLibrary.PARODD;
+                mSerialOptions.c_iflag |= CLibrary.INPCK;
+                break;
+            case 's':
+            case 'S': //设置为空格
+                mSerialOptions.c_cflag &= ~CLibrary.PARENB;
+                mSerialOptions.c_cflag &= ~CLibrary.CSTOPB;
+                break;
+            default://设置为奇校验
+                mSerialOptions.c_cflag |= (CLibrary.PARODD | CLibrary.PARENB);
+                mSerialOptions.c_iflag |= CLibrary.INPCK;
+        }
+    }
+    public void setToEffective()
+    {
+        CLibrary.INSTANCE.tcflush(mSerialFd, CLibrary.TCIFLUSH);//溢出数据可以接收，但不读
+        CLibrary.INSTANCE.tcsetattr(mSerialFd, CLibrary.TCSANOW, mSerialOptions);
+    }
+    //other
+    public void setOutputMode(int outputMode)
+    {
+        mSerialOptions.c_oflag = outputMode;
+        setToEffective();
+    }
+
+    public void setTeminalMode(int teminalMode)
+    {
+        mSerialOptions.c_lflag = teminalMode;
+        setToEffective();
     }
 }

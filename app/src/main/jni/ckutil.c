@@ -49,6 +49,9 @@ int init_serial(char* device,int baud_rate,int transfer_data_len)
     options.c_cflag |= CRTSCTS;
     //
     options.c_cflag |= IXON | IXOFF | IXANY;
+
+   // NCCS
+//    PARODD
     //test-ee
 
 

@@ -10,26 +10,20 @@ import com.sun.jna.Structure;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * linux c api
- *
- * @author hocking
- */
 public interface CLibrary extends Library {
 
     CLibrary INSTANCE = (CLibrary) com.sun.jna.Native.loadLibrary("c", CLibrary.class);
     //ycc@pemt
-    int O_RDWR = 2;
-    int O_NOCTTY = 256;
-    int O_NDELAY = 2048;
-    int B115200 = 4098;
-    int CS8 = 48;
-    int CLOCAL = 2048;
-    int CREAD = 128;
-    int CSIZE = 48;
-    int CRTSCTS = -2147483648;
-    int CSTOPB = 64;
-    int IGNPAR = 4;
+    int O_RDWR = 00000002;
+    int O_NOCTTY = 00000400;
+    int O_NDELAY = 00004000;
+    int B115200 = 0010002;
+    int CLOCAL = 0004000;
+    int CREAD = 0000200;
+    int CSIZE = 0000060;
+    int CRTSCTS = 020000000000;
+    int CSTOPB = 0000100;
+    int IGNPAR = 0000004;
     int TCIFLUSH = 0;
     int TCSANOW = 0;
     int NCCS = 19;
@@ -37,6 +31,14 @@ public interface CLibrary extends Library {
     int IXON = 0002000;
     int IXOFF = 0010000;
     int IXANY = 0004000;
+    int CS5 = 0000000;
+    int CS6 = 0000020;
+    int CS7 = 0000040;
+    int CS8 = 0000060;
+    int PARENB = 0000400;
+    int INPCK = 0000020;
+    int PARODD = 0001000;
+
     class termios extends Structure
     {
         public int c_iflag;
@@ -78,9 +80,8 @@ public interface CLibrary extends Library {
     int tcflush(int fd, int p2);
     int close(int fd);
     long read(int fd, char[] data, int dataLen);
-    void memset(fd_set fs,int c, int n);
     void FD_ZERO(fd_set fs);
-    int select(int a,fd_set fs,fd_set fs2,fd_set fs3,timeval tv);
+    int select(int a,fd_set fs1,fd_set fs2,fd_set fs3,timeval tv);
     void FD_SET(int fd, fd_set set);
     boolean FD_ISSET(int fd, fd_set set);
 }

@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import com.pemt.util.UartUtil;
 import com.pemt.util.UartUtil_1;
 
 
@@ -66,6 +67,7 @@ public class CkMain extends Activity {
 //                    mRsvThread.interrupt();
 //                }
 //                mRsvThread.start();
+                new UartUtil().openSerial();
             }
         });
         mWriteBtn.setOnClickListener(new View.OnClickListener() {
