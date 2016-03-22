@@ -3,8 +3,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h> //文件控制定义
-#include <termios.h>//终端控制定义
+#include <fcntl.h> //文件控制定义  
+#include <termios.h>//终端控制定义  
 #include <errno.h>
 char* device="/dev/ttyUSB0";
 
@@ -31,7 +31,8 @@ void defaultConfigWithFd()
     options.c_iflag |= IGNPAR;//无奇偶检验位
     options.c_oflag = 0; //输出模式
     options.c_lflag = 0; //不激活终端模式
-    cfsetospeed(&options, B115200);//设置波特率
+    cfsetospeed(&options, B300);//设置波特率
+	cfsetispeed(&options, B300);
 
     /**3. 设置新属性，TCSANOW：所有改变立即生效*/
     tcflush(serial_fd, TCIFLUSH);//溢出数据可以接收，但不读
@@ -54,7 +55,7 @@ void uart_close()
     close(serial_fd);
 }
 
-//打开串口并初始化设置
+//打开串口并初始化设置  
 int init_serial(char* device)
 {
     if (openSerial(device) < 0) {
@@ -64,7 +65,11 @@ int init_serial(char* device)
     defaultConfigWithFd();
     return 0;
 }
-
+void make_set_effect()
+{
+	tcflush(serial_fd, TCIFLUSH);//溢出数据可以接收，但不读
+    tcsetattr(serial_fd, TCSANOW, &options);
+}
 //***ycc --bb
 //set baudrate
 void set_baudrate(int speed) {
@@ -78,14 +83,16 @@ void set_baudrate(int speed) {
         if (speed == name_arr[i]) {
             cfsetispeed(&options, speed_arr[i]);
             cfsetospeed(&options, speed_arr[i]);
+            printf("set speed = %d\n",speed);
         }
     }
+	make_set_effect();
 }
 //set device
 void set_device(char* device)
 {
-    uart_close();
-    serial_fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
+	uart_close();
+	serial_fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
 }
 //set data bits
 int set_data_bits(int databits)
@@ -142,18 +149,18 @@ void set_parity_bits(int parity)
             options.c_iflag &= ~INPCK;
             break;
         case 'o':
-        case 'O'://设置为奇校验
+        case 'O'://设置为奇校验    
             options.c_cflag |= (PARODD | PARENB);
             options.c_iflag |= INPCK;
             break;
         case 'e':
-        case 'E'://设置为偶校验
+        case 'E'://设置为偶校验  
             options.c_cflag |= PARENB;
             options.c_cflag &= ~PARODD;
             options.c_iflag |= INPCK;
             break;
         case 's':
-        case 'S': //设置为空格
+        case 'S': //设置为空格 
             options.c_cflag &= ~PARENB;
             options.c_cflag &= ~CSTOPB;
             break;
@@ -164,7 +171,7 @@ void set_parity_bits(int parity)
 //set stop bits
 void set_stop_bits(int stopbits)
 {
-    // 设置停止位
+    // 设置停止位 
     switch (stopbits)
     {
         case 1:
@@ -179,10 +186,10 @@ void set_stop_bits(int stopbits)
 }
 //***ycc --ee
 
-/**
-*串口发送数据
-*@fd:串口描述符
-*@data:待发送数据
+/** 
+*串口发送数据 
+*@fd:串口描述符 
+*@data:待发送数据 
 *@datalen:数据长度
 */
 int uart_send(char *data, int datalen)
@@ -216,7 +223,6 @@ int uart_recv(char *data, int datalen)
 
     while(FD_ISSET(serial_fd,&fs_read))
     {
-
         FD_ZERO(&fs_read);
         FD_SET(serial_fd,&fs_read);
         ret = select(serial_fd+1, &fs_read, NULL, NULL, &tv_timeout);
@@ -225,7 +231,8 @@ int uart_recv(char *data, int datalen)
 
         if(FD_ISSET(serial_fd, &fs_read)) {
             len = read(serial_fd, data, datalen);
-            printf("len = %d\n", len);
+            printf("len = %d;data=%s(sleep 2 sec)\n", len,data);
+            //sleep(2);
             if(-1==len) {
                 return -1;
             }
@@ -233,6 +240,62 @@ int uart_recv(char *data, int datalen)
             perror("select");
         }
     }
+    return 0;
+}
+//test1 
+int ycc_uart_recv(char *data, int datalen)
+{
+    int len=0, ret = 0;
+    while(1)
+    {
+        len = read(serial_fd, data, datalen);
+        printf("len = %d;data=%s(sleep 2 sec)\n", len,data);
+        //sleep(2);
+        if(-1==len) {
+            return -1;
+        }
+    }
+    return 0;
+}
+//test2
+int ycc2_uart_recv(char *data, int datalen)
+{
+    int len=0, ret = 0;
+   
+	len = read(serial_fd, data, datalen);
+	printf("len = %d;data=%s(sleep 2 sec)\n", len,data);
+	//sleep(2);
+	if(-1==len) {
+		return -1;
+	}
+    return 0;
+}
+//test3
+int ycc3_uart_recv(char *data, int datalen)
+{
+    int len=0, ret = 0;
+    fd_set fs_read;
+    struct timeval tv_timeout;
+
+    FD_ZERO(&fs_read);
+    FD_SET(serial_fd, &fs_read);
+    tv_timeout.tv_sec  =2;     // (10*20/115200+5);
+    tv_timeout.tv_usec = 0;
+
+	ret = select(serial_fd+1, &fs_read, NULL, NULL, &tv_timeout);
+	printf("ret = %d\n", ret);
+	//如果返回0，代表在描述符状态改变前已超过timeout时间,错误返回-1
+
+	if(FD_ISSET(serial_fd, &fs_read)) {
+		len = read(serial_fd, data, datalen);
+		printf("len = %d;data=%s(sleep 2 sec)\n", len,data);
+		//sleep(2);
+		if(-1==len) {
+			return -1;
+		}
+	} else {
+		perror("select");
+	}
     return 0;
 }
 
@@ -243,18 +306,23 @@ void testSend()
 }
 void testRsv()
 {
-    char buf1[11];
-    uart_recv(buf1, sizeof(buf1));
-    printf("uart receive %s\n", buf1);
+    char buf1[3];
+    //uart_recv(buf1, sizeof(buf1));
+	//ycc_uart_recv(buf1, sizeof(buf1));
+	//ycc2_uart_recv(buf1, sizeof(buf1));
+	ycc3_uart_recv(buf1, sizeof(buf1));
+    printf("finally-uart-receive=***%s\n", buf1);
 }
 int main(int argc, char **argv)
 {
     //rsv
-    init_serial("/dev/tty");
+    init_serial("/dev/pts/4");
+    set_baudrate(300);
+	//testRsv();
     while (1){
         testRsv();
-        sleep(1000);
-    }
+    } 
+    //sleep(1);
     return 0;
 }
 

@@ -3,8 +3,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h> //文件控制定义
-#include <termios.h>//终端控制定义
+#include <fcntl.h> //文件控制定义  
+#include <termios.h>//终端控制定义  
 #include <errno.h>
 char* device="/dev/ttyUSB0";
 
@@ -32,6 +32,7 @@ void defaultConfigWithFd()
     options.c_oflag = 0; //输出模式
     options.c_lflag = 0; //不激活终端模式
     cfsetospeed(&options, B115200);//设置波特率
+	cfsetispeed(&options, B115200);
 
     /**3. 设置新属性，TCSANOW：所有改变立即生效*/
     tcflush(serial_fd, TCIFLUSH);//溢出数据可以接收，但不读
@@ -54,7 +55,7 @@ void uart_close()
     close(serial_fd);
 }
 
-//打开串口并初始化设置
+//打开串口并初始化设置  
 int init_serial(char* device)
 {
     if (openSerial(device) < 0) {
@@ -64,7 +65,11 @@ int init_serial(char* device)
     defaultConfigWithFd();
     return 0;
 }
-
+void make_set_effect()
+{
+	tcflush(serial_fd, TCIFLUSH);//溢出数据可以接收，但不读
+    tcsetattr(serial_fd, TCSANOW, &options);
+}
 //***ycc --bb
 //set baudrate
 void set_baudrate(int speed) {
@@ -80,12 +85,13 @@ void set_baudrate(int speed) {
             cfsetospeed(&options, speed_arr[i]);
         }
     }
+    make_set_effect();
 }
 //set device
 void set_device(char* device)
 {
-    uart_close();
-    serial_fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
+	uart_close();
+	serial_fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
 }
 //set data bits
 int set_data_bits(int databits)
@@ -142,18 +148,18 @@ void set_parity_bits(int parity)
             options.c_iflag &= ~INPCK;
             break;
         case 'o':
-        case 'O'://设置为奇校验
+        case 'O'://设置为奇校验    
             options.c_cflag |= (PARODD | PARENB);
             options.c_iflag |= INPCK;
             break;
         case 'e':
-        case 'E'://设置为偶校验
+        case 'E'://设置为偶校验  
             options.c_cflag |= PARENB;
             options.c_cflag &= ~PARODD;
             options.c_iflag |= INPCK;
             break;
         case 's':
-        case 'S': //设置为空格
+        case 'S': //设置为空格 
             options.c_cflag &= ~PARENB;
             options.c_cflag &= ~CSTOPB;
             break;
@@ -164,7 +170,7 @@ void set_parity_bits(int parity)
 //set stop bits
 void set_stop_bits(int stopbits)
 {
-    // 设置停止位
+    // 设置停止位 
     switch (stopbits)
     {
         case 1:
@@ -179,17 +185,19 @@ void set_stop_bits(int stopbits)
 }
 //***ycc --ee
 
-/**
-*串口发送数据
-*@fd:串口描述符
-*@data:待发送数据
+/** 
+*串口发送数据 
+*@fd:串口描述符 
+*@data:待发送数据 
 *@datalen:数据长度
 */
 int uart_send(char *data, int datalen)
 {
     int len = 0;
     len = write(serial_fd, data, datalen);//实际写入的长度
+    printf("len of write=%d\n",len);
     if(len == datalen) {
+        printf("len == datalen\n");
         return len;
     } else {
         tcflush(serial_fd, TCOFLUSH);//TCOFLUSH刷新写入的数据但不传送
@@ -238,23 +246,35 @@ int uart_recv(char *data, int datalen)
 
 void testSend()
 {
-    char buf[]="yccyccyccy";
+    char buf[]="i am from uart";
     uart_send(buf, sizeof(buf));
 }
+
+void testSend_input_by_hand()
+{
+    char buf[3];
+	printf("please input send content...\n");
+	scanf("%s",buf);;
+    uart_send(buf, sizeof(buf));
+}
+
 void testRsv()
 {
-    char buf1[11];
+    char buf1[13];
     uart_recv(buf1, sizeof(buf1));
     printf("uart receive %s\n", buf1);
 }
 int main(int argc, char **argv)
 {
-    //send
-    init_serial("/dev/tty");
+   //send
+    init_serial("/dev/pts/1");
+	set_baudrate(38400);
     while (1){
-        testSend();
-        printf("send content\n");
-        sleep(1000);
+		printf("send begin\n");
+        //testSend();
+		testSend_input_by_hand();
+        printf("send over\n\n");
+        sleep(1);
     }
     return 0;
 }
