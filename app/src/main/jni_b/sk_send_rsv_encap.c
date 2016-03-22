@@ -84,8 +84,8 @@ void set_baudrate(int speed) {
 //set device
 void set_device(char* device)
 {
-	uart_close();
-	serial_fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
+    uart_close();
+    serial_fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
 }
 //set data bits
 int set_data_bits(int databits)
@@ -245,6 +245,7 @@ void testSend()
 }
 void testRsv()
 {
+    init_serial("/dev/tty");
     char buf1[11];
     uart_recv(buf1, sizeof(buf1));
     printf("uart receive %s\n", buf1);
@@ -252,7 +253,7 @@ void testRsv()
 int main(int argc, char **argv)
 {
     testSend();
-	//testRsv();
+    //testRsv();
     return 0;
 }
 

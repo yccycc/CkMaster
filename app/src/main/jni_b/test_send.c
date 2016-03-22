@@ -3,8 +3,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h> //文件控制定义  
-#include <termios.h>//终端控制定义  
+#include <fcntl.h> //文件控制定义
+#include <termios.h>//终端控制定义
 #include <errno.h>
 char* device="/dev/ttyUSB0";
 
@@ -37,11 +37,6 @@ void defaultConfigWithFd()
     tcflush(serial_fd, TCIFLUSH);//溢出数据可以接收，但不读
     tcsetattr(serial_fd, TCSANOW, &options);
 }
-void make_set_effect()
-{
-    tcflush(serial_fd, TCIFLUSH);//溢出数据可以接收，但不读
-    tcsetattr(serial_fd, TCSANOW, &options);
-}
 //open serial--ycc1
 int openSerial(char* device)
 {
@@ -59,7 +54,7 @@ void uart_close()
     close(serial_fd);
 }
 
-//打开串口并初始化设置  
+//打开串口并初始化设置
 int init_serial(char* device)
 {
     if (openSerial(device) < 0) {
@@ -85,14 +80,12 @@ void set_baudrate(int speed) {
             cfsetospeed(&options, speed_arr[i]);
         }
     }
-    make_set_effect();
 }
 //set device
 void set_device(char* device)
 {
     uart_close();
     serial_fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
-    make_set_effect();
 }
 //set data bits
 int set_data_bits(int databits)
@@ -117,7 +110,6 @@ int set_data_bits(int databits)
             fprintf(stderr,"Unsupported data size/n");
             return -1;
     }
-    make_set_effect();
 }
 //set flow control
 void set_flow_ctrl(int flow_ctrl)
@@ -137,7 +129,6 @@ void set_flow_ctrl(int flow_ctrl)
             options.c_cflag |= IXON | IXOFF | IXANY;
             break;
     }
-    make_set_effect();
 }
 //set parity bits
 void set_parity_bits(int parity)
@@ -151,30 +142,29 @@ void set_parity_bits(int parity)
             options.c_iflag &= ~INPCK;
             break;
         case 'o':
-        case 'O'://设置为奇校验    
+        case 'O'://设置为奇校验
             options.c_cflag |= (PARODD | PARENB);
             options.c_iflag |= INPCK;
             break;
         case 'e':
-        case 'E'://设置为偶校验  
+        case 'E'://设置为偶校验
             options.c_cflag |= PARENB;
             options.c_cflag &= ~PARODD;
             options.c_iflag |= INPCK;
             break;
         case 's':
-        case 'S': //设置为空格 
+        case 'S': //设置为空格
             options.c_cflag &= ~PARENB;
             options.c_cflag &= ~CSTOPB;
             break;
         default:
             fprintf(stderr,"Unsupported parity/n");
     }
-    make_set_effect();
 }
 //set stop bits
 void set_stop_bits(int stopbits)
 {
-    // 设置停止位 
+    // 设置停止位
     switch (stopbits)
     {
         case 1:
@@ -186,14 +176,13 @@ void set_stop_bits(int stopbits)
         default:
             fprintf(stderr,"Unsupported stop bits/n");
     }
-    make_set_effect();
 }
 //***ycc --ee
 
-/** 
-*串口发送数据 
-*@fd:串口描述符 
-*@data:待发送数据 
+/**
+*串口发送数据
+*@fd:串口描述符
+*@data:待发送数据
 *@datalen:数据长度
 */
 int uart_send(char *data, int datalen)
@@ -249,21 +238,24 @@ int uart_recv(char *data, int datalen)
 
 void testSend()
 {
-    char buf[]="so sexy";
+    char buf[]="yccyccyccy";
     uart_send(buf, sizeof(buf));
 }
 void testRsv()
 {
-    char buf1[8];
+    char buf1[11];
     uart_recv(buf1, sizeof(buf1));
     printf("uart receive %s\n", buf1);
 }
 int main(int argc, char **argv)
 {
+    //send
     init_serial("/dev/tty");
-    testSend();
-    testRsv();
-    close(serial_fd);
+    while (1){
+        testSend();
+        printf("send content\n");
+        sleep(1000);
+    }
     return 0;
 }
 
