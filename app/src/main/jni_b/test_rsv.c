@@ -210,7 +210,7 @@ int uart_send(char *data, int datalen)
 *串口接收数据
 *要求启动后，在pc端发送ascii文件
 */
-int uart_recv(char *data, int datalen)
+int uart_recv_select_while(char *data, int datalen)
 {
     int len=0, ret = 0;
     fd_set fs_read;
@@ -232,7 +232,6 @@ int uart_recv(char *data, int datalen)
         if(FD_ISSET(serial_fd, &fs_read)) {
             len = read(serial_fd, data, datalen);
             printf("len = %d;data=%s(sleep 2 sec)\n", len,data);
-            //sleep(2);
             if(-1==len) {
                 return -1;
             }
@@ -243,14 +242,14 @@ int uart_recv(char *data, int datalen)
     return 0;
 }
 //test1 
-int ycc_uart_recv(char *data, int datalen)
+int ycc_uart_recv_while_noselect(char *data, int datalen)
 {
     int len=0, ret = 0;
     while(1)
     {
         len = read(serial_fd, data, datalen);
         printf("len = %d;data=%s(sleep 2 sec)\n", len,data);
-        //sleep(2);
+        sleep(1);
         if(-1==len) {
             return -1;
         }
@@ -258,7 +257,7 @@ int ycc_uart_recv(char *data, int datalen)
     return 0;
 }
 //test2
-int ycc2_uart_recv(char *data, int datalen)
+int ycc2_uart_recv_noselect_nowhile(char *data, int datalen)
 {
     int len=0, ret = 0;
    
@@ -271,7 +270,7 @@ int ycc2_uart_recv(char *data, int datalen)
     return 0;
 }
 //test3
-int ycc3_uart_recv(char *data, int datalen)
+int ycc3_uart_recv_use_select_no_while(char *data, int datalen)
 {
     int len=0, ret = 0;
     fd_set fs_read;
@@ -291,6 +290,7 @@ int ycc3_uart_recv(char *data, int datalen)
 		printf("len = %d;data=%s(sleep 2 sec)\n", len,data);
 		//sleep(2);
 		if(-1==len) {
+			printf("len = %d;data=%s\n", len,data);
 			return -1;
 		}
 	} else {
@@ -299,30 +299,59 @@ int ycc3_uart_recv(char *data, int datalen)
     return 0;
 }
 
-void testSend()
+//test4---right---safe_read
+int uart_rsv(char *data, int datalen)
 {
-    char buf[]="yccyccyccy";
-    uart_send(buf, sizeof(buf));
+    int len=0, ret = 0;
+    fd_set fs_read;
+    struct timeval tv_timeout;
+
+    FD_ZERO(&fs_read);
+    FD_SET(serial_fd, &fs_read);
+    tv_timeout.tv_sec  =0;     // (10*20/115200+5);
+    tv_timeout.tv_usec = 0;
+
+	ret = select(serial_fd+1, &fs_read, NULL, NULL, &tv_timeout);
+	printf("ret = %d\n", ret);
+	//如果返回0，代表在描述符状态改变前已超过timeout时间,错误返回-1
+
+	if(ret) {
+		len = read(serial_fd, data, datalen);
+		printf("len = %d;data=%s\n", len,data);
+		//sleep(2);
+		if(-1==len) {
+			printf("len = %d;data=%s\n", len,data);
+			return -1;
+		}
+	} else {
+		printf("read data over\n");
+		return -1;
+	}
+    return 0;
 }
+
 void testRsv()
 {
     char buf1[3];
-    //uart_recv(buf1, sizeof(buf1));
-	//ycc_uart_recv(buf1, sizeof(buf1));
-	//ycc2_uart_recv(buf1, sizeof(buf1));
-	ycc3_uart_recv(buf1, sizeof(buf1));
-    printf("finally-uart-receive=***%s\n", buf1);
+	uart_rsv(buf1, sizeof(buf1));
+    //uart_recv_select_while(buf1, sizeof(buf1));
+	//ycc_uart_recv_while_noselect(buf1, sizeof(buf1));
+	//ycc2_uart_recv_noselect_nowhile(buf1, sizeof(buf1));
+	//ycc3_uart_recv_use_select_no_while(buf1, sizeof(buf1));
+    printf("@@@finally-uart-receive=%s\n", buf1);
 }
 int main(int argc, char **argv)
 {
+	int i =0;
     //rsv
     init_serial("/dev/pts/4");
     set_baudrate(300);
 	//testRsv();
     while (1){
+	    printf("rsv-bb**%d\n",++i);
         testRsv();
+		printf("rsv-over\n\n");
     } 
-    //sleep(1);
     return 0;
 }
 

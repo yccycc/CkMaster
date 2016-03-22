@@ -235,6 +235,7 @@ int uart_recv(char *data, int datalen)
             len = read(serial_fd, data, datalen);
             printf("len = %d\n", len);
             if(-1==len) {
+				printf("len = %d\n", len);
                 return -1;
             }
         } else {
@@ -244,26 +245,15 @@ int uart_recv(char *data, int datalen)
     return 0;
 }
 
-void testSend()
-{
-    char buf[]="i am from uart";
-    uart_send(buf, sizeof(buf));
-}
-
 void testSend_input_by_hand()
 {
-    char buf[3];
+    char buf[4];
 	printf("please input send content...\n");
-	scanf("%s",buf);;
+	scanf("%s",buf);
     uart_send(buf, sizeof(buf));
+	printf("send:%s\n",buf);
 }
 
-void testRsv()
-{
-    char buf1[13];
-    uart_recv(buf1, sizeof(buf1));
-    printf("uart receive %s\n", buf1);
-}
 int main(int argc, char **argv)
 {
    //send
@@ -274,7 +264,6 @@ int main(int argc, char **argv)
         //testSend();
 		testSend_input_by_hand();
         printf("send over\n\n");
-        sleep(1);
     }
     return 0;
 }
