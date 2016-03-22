@@ -10,11 +10,13 @@ char* device="/dev/ttyUSB0";
 
 int serial_fd = 0;
 
+struct termios options;
+
 //default config with fd--ycc1
 void defaultConfigWithFd()
 {
     //串口主要设置结构体termios <termios.h>
-    struct termios options;
+    //struct termios options;
 
     /**1. tcgetattr函数用于获取与终端相关的参数。
     *参数fd为终端的文件描述符，返回的结果保存在termios结构体中
@@ -46,6 +48,12 @@ int openSerial(char* device)
     return serial_fd;
 }
 
+//close
+void uart_close()
+{
+    close(serial_fd);
+}
+
 //打开串口并初始化设置  
 int init_serial(char* device)
 {
@@ -56,6 +64,120 @@ int init_serial(char* device)
     defaultConfigWithFd();
     return 0;
 }
+
+//***ycc --bb
+//set baudrate
+void set_baudrate(int speed) {
+    int i;
+    int speed_arr[] = {B38400, B19200, B9600, B4800, B2400, B1200, B300,
+                       B38400, B19200, B9600, B4800, B2400, B1200, B300};
+    int name_arr[] = {38400, 19200, 9600, 4800, 2400, 1200, 300, 38400, 19200, 9600, 4800, 2400,
+                      1200, 300};
+    //设置串口输入波特率和输出波特率
+    for (i = 0; i < sizeof(speed_arr) / sizeof(int); i++) {
+        if (speed == name_arr[i]) {
+            cfsetispeed(&options, speed_arr[i]);
+            cfsetospeed(&options, speed_arr[i]);
+        }
+    }
+}
+//set device
+void set_device(char* device)
+{
+	uart_close();
+	serial_fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
+}
+//set data bits
+int set_data_bits(int databits)
+{
+    //设置数据位
+    options.c_cflag &= ~CSIZE; //屏蔽其他标志位
+    switch (databits)
+    {
+        case 5    :
+            options.c_cflag |= CS5;
+            break;
+        case 6    :
+            options.c_cflag |= CS6;
+            break;
+        case 7    :
+            options.c_cflag |= CS7;
+            break;
+        case 8:
+            options.c_cflag |= CS8;
+            break;
+        default:
+            fprintf(stderr,"Unsupported data size/n");
+            return -1;
+    }
+}
+//set flow control
+void set_flow_ctrl(int flow_ctrl)
+{
+    //设置数据流控制
+    switch(flow_ctrl)
+    {
+
+        case 0 ://不使用流控制
+            options.c_cflag &= ~CRTSCTS;
+            break;
+
+        case 1 ://使用硬件流控制
+            options.c_cflag |= CRTSCTS;
+            break;
+        case 2 ://使用软件流控制
+            options.c_cflag |= IXON | IXOFF | IXANY;
+            break;
+    }
+}
+//set parity bits
+void set_parity_bits(int parity)
+{
+    //设置校验位
+    switch (parity)
+    {
+        case 'n':
+        case 'N': //无奇偶校验位。
+            options.c_cflag &= ~PARENB;
+            options.c_iflag &= ~INPCK;
+            break;
+        case 'o':
+        case 'O'://设置为奇校验    
+            options.c_cflag |= (PARODD | PARENB);
+            options.c_iflag |= INPCK;
+            break;
+        case 'e':
+        case 'E'://设置为偶校验  
+            options.c_cflag |= PARENB;
+            options.c_cflag &= ~PARODD;
+            options.c_iflag |= INPCK;
+            break;
+        case 's':
+        case 'S': //设置为空格 
+            options.c_cflag &= ~PARENB;
+            options.c_cflag &= ~CSTOPB;
+            break;
+        default:
+            fprintf(stderr,"Unsupported parity/n");
+    }
+}
+//set stop bits
+void set_stop_bits(int stopbits)
+{
+    // 设置停止位 
+    switch (stopbits)
+    {
+        case 1:
+            options.c_cflag &= ~CSTOPB;
+            break;
+        case 2:
+            options.c_cflag |= CSTOPB;
+            break;
+        default:
+            fprintf(stderr,"Unsupported stop bits/n");
+    }
+}
+//***ycc --ee
 
 /** 
 *串口发送数据 
@@ -113,10 +235,6 @@ int uart_recv(char *data, int datalen)
     }
     return 0;
 }
-void uart_close(int fd)
-{
-    close(fd);
-}
 
 void testSend()
 {
@@ -134,7 +252,7 @@ void testRsv()
 int main(int argc, char **argv)
 {
     testSend();
-    testRsv();
+	//testRsv();
     return 0;
 }
 
