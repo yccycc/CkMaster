@@ -10,13 +10,11 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.pemt.util.UartUtil;
-import com.pemt.util.UartUtil_1;
 
 
 public class CkMain extends Activity {
     private Button mWriteBtn;
     private EditText mWriteEt;
-    private UartUtil_1 mUUartUtil;
     private EditText mDevNameEt;
     private EditText mBaudrateEt;
     private EditText mDataLenEt;
@@ -54,7 +52,6 @@ public class CkMain extends Activity {
         mDataLenSpinner.setAdapter(dataLenAdapter);
         mBaudrateSpinner.setSelection(12);
         mDataLenSpinner.setSelection(3);
-        mUUartUtil = new UartUtil_1();
         mUartSet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -62,21 +59,13 @@ public class CkMain extends Activity {
                 devName = (devName.equals("")?"/dev/tty":devName);
                 int baudrate = Integer.parseInt(mBaudrateSpinner.getSelectedItem().toString());
                 int dataLen = Integer.parseInt(mDataLenSpinner.getSelectedItem().toString());
-             //   mUUartUtil.initUart(devName, baudrate, dataLen);
-//                if(mRsvThread.isAlive()) {
-//                    mRsvThread.interrupt();
-//                }
-//                mRsvThread.start();
                 new UartUtil().openSerial();
-              // Log.i("goddes", CLibraryYcc.INSTANCE.yccadd(100, 111) + "$");
-               // CkUtilLibrary.INSTANCE.init_serial();
             }
         });
         mWriteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String sendContent = mWriteEt.getText().toString();
-              //  mUUartUtil.uartSend(sendContent, sendContent.getBytes().length);
             }
         });
         class ReceiceRunnable implements Runnable{
@@ -100,11 +89,6 @@ public class CkMain extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        if(mRsvThread.isAlive())
-//        {
-//            mRsvThread.interrupt();
-//        }
-        //mUUartUtil.closeUart();
         new UartUtil().closeSerial();
     }
 }
