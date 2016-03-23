@@ -7,7 +7,7 @@ package com.pemt.jnahelper;
 import com.sun.jna.Library;
 import com.sun.jna.Structure;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public interface CLibrary extends Library {
@@ -49,7 +49,7 @@ public interface CLibrary extends Library {
         public char c_cc[] = new char[NCCS];
         @Override
         protected List getFieldOrder() {
-            return new ArrayList();
+            return Arrays.asList("c_iflag", "c_oflag", "c_cflag", "c_lflag", "c_line", "c_cc");
         }
     }
 
@@ -58,7 +58,7 @@ public interface CLibrary extends Library {
         public long fds_bits[] = new long[1024/8*8];
         @Override
         protected List getFieldOrder() {
-            return new ArrayList();
+            return Arrays.asList("fds_bits");
         }
     }
 
@@ -68,7 +68,7 @@ public interface CLibrary extends Library {
         public long tv_usec;
         @Override
         protected List getFieldOrder() {
-            return new ArrayList();
+            return Arrays.asList("tv_sec","tv_usec");
         }
     }
     int open(String pathname, int flags);

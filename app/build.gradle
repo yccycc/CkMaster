@@ -10,12 +10,12 @@ android {
         targetSdkVersion 19
         versionCode 1
         versionName "1.0"
-        ndk{
-            moduleName "ckutil"
-            ldLibs "log"
-            abiFilters "armeabi"
-            stl "gnustl_shared" //这个对应的是 APP_STL
-        }
+//        ndk{
+//            moduleName "ckutil"
+//            ldLibs "log"
+//            abiFilters "armeabi"
+//            stl "gnustl_shared" //这个对应的是 APP_STL
+//        }
     }
     buildTypes {
         release {
